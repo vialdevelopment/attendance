@@ -1,5 +1,4 @@
-#Attendance
-
+# Attendance
 Attendance is a small and (hopefully) decently quick event handler that supports priority and other fun things
 
 It's made to be as small and simple as I can get it.
