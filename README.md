@@ -30,22 +30,22 @@ public class Main {
     // When this is ran, these should print out 3, 2, 1, then 0 in that order because of the priority
 
     @Attend(priority = 3)
-    public Attender<Event> event3 = new Attender<>(event -> {
+    public Attender<Event> event3 = new Attender<>(Event.class, event -> {
         System.out.println("3");
     });
 
     @Attend(priority = 1)
-    public Attender<Event> event1 = new Attender<>(event -> {
+    public Attender<Event> event1 = new Attender<>(Event.class, event -> {
         System.out.println("1");
     });
 
     @Attend(priority = 2)
-    public Attender<Event> event2 = new Attender<>(event -> {
+    public Attender<Event> event2 = new Attender<>(Event.class, event -> {
         System.out.println("2");
     });
 
     @Attend(priority = 0)
-    public Attender<Event> event0 = new Attender<>(event -> {
+    public Attender<Event> event0 = new Attender<>(Event.class, event -> {
         System.out.println("0");
     });
 
