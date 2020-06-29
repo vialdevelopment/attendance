@@ -1,6 +1,5 @@
 plugins {
     id 'java'
-    id "com.github.johnrengelman.shadow" version "6.0.0"
 }
 
 group = "io.github.vialdevelopment"
@@ -9,20 +8,6 @@ version '1.0'
 
 sourceCompatibility = 1.8
 
-shadowJar() {
-    dependencies {
-        include(dependency("net.jodah:typetools"))
-    }
-
-    classifier = "release"
-}
-
-build.dependsOn.add("shadowJar")
-
 repositories {
     mavenCentral()
-}
-
-dependencies {
-    compile group: 'net.jodah', name: 'typetools', version: '0.5.0'
 }

@@ -1,7 +1,5 @@
 package io.github.vialdevelopment.attendance.attender;
 
-import net.jodah.typetools.TypeResolver;
-
 import java.util.function.Consumer;
 
 /**
@@ -40,11 +38,9 @@ public class Attender<T> {
     private long priority;
 
     // They won't happen
-    @SuppressWarnings("unchecked")
-    public Attender(Consumer<T> consumer) {
+    public Attender(Class<T> consumerClass, Consumer<T> consumer) {
+        this.consumerClass = consumerClass;
         this.consumer = consumer;
-
-        this.consumerClass = (Class<T>) TypeResolver.resolveRawArgument(Consumer.class, consumer.getClass());
     }
 
     /**
@@ -80,7 +76,7 @@ public class Attender<T> {
         this.attending = attending;
     }
 
-    public Object getConsumerClass() {
+    public Class<T> getConsumerClass() {
         return this.consumerClass;
     }
 
