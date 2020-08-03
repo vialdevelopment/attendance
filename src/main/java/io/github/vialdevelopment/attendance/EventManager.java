@@ -5,20 +5,28 @@ import io.github.vialdevelopment.attendance.attender.Attender;
 
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author cats
  * @since June 21, 2020
  *
  * This is the manager, create an instance of this in your project
+ *
+ * edited on August 2nd, 2020
+ * I switched over to using hashmaps to organize attenders based on their consumer classes
  */
 public class EventManager {
 
     /**
-     * a list of the {@link Attender}s that have been registered
+     * a map of the consumer classes and the {@link Attender}s that are attending to them
      */
-    private List<Attender> attenders = new CopyOnWriteArrayList<Attender>();
+    private final Map<Class, List<Attender>> attenderMap = new HashMap<>();
+
+    /**
+     * a map of the parent classes and the {@link Attender}s
+     * this is a bit odd, but it is used to
+     */
+    private final Map<Object, List<Attender>> parentMap = new HashMap<>();
 
     /**
      * This dispatches any Object as an event to any listener that takes it
@@ -28,12 +36,14 @@ public class EventManager {
     // Won't happen
     @SuppressWarnings("unchecked")
     public void dispatch(Object event) {
-        for (Attender attender : this.getAttenders()) {
-            // Only dispatch if the attender is attending
+        // Throws a NPE if you don't have any attenders of that type
+        final List<Attender> attenders = this.getAttenderMap().get(event.getClass());
+
+        int size = attenders.size();
+        for (int i = 0; i < size; i++) {
+            final Attender attender = attenders.get(i);
             if (attender.isAttending()) {
-                if (attender.getConsumerClass() == event.getClass()) {
-                    attender.dispatch(event);
-                }
+                attender.dispatch(event);
             }
         }
     }
@@ -66,13 +76,26 @@ public class EventManager {
                 if(listener != null) {
                     // Sets the needed information
                     listener.setPriority(annotation.priority());
-                    listener.setParent(object.getClass());
-                    this.getAttenders().add(listener);
+                    listener.setParent(object);
+
+                    if (!this.getAttenderMap().containsKey(listener.getConsumerClass())) {
+                        this.getAttenderMap().put(listener.getConsumerClass(), Collections.synchronizedList(new ArrayList<>()));
+                    }
+
+                    if (!this.getParentMap().containsKey(object)) {
+                        this.getParentMap().put(object, Collections.synchronizedList(new ArrayList<>()));
+                    }
+
+                    this.getParentMap().get(object).add(listener);
+
+                    final List<Attender> attenders = this.getAttenderMap().get(listener.getConsumerClass());
+
+                    attenders.add(listener);
+                    attenders.sort(Comparator.comparing(Attender::getSortingPriority));
+
                 }
             }
         }
-        // Sorts after adding the Attenders
-        this.getAttenders().sort(Comparator.comparing(Attender::getSortingPriority));
     }
 
 
@@ -97,7 +120,9 @@ public class EventManager {
                 }
 
                 if(listener != null) {
-                    this.getAttenders().remove(listener);
+                    // this might thrown a NPE if you try to unregister an Attender that has not been registered
+                    this.getAttenderMap().get(listener.getConsumerClass()).remove(listener);
+                    this.getParentMap().get(object).remove(listener);
                 }
             }
         }
@@ -108,12 +133,9 @@ public class EventManager {
      * @return if that object's {@link Attender}s (if it has any) are attending
      */
     public boolean isAttended(Object object) {
-        for (Attender attender : this.getAttenders()) {
-            if (attender.getParent() == object.getClass()) {
-                return attender.isAttending();
-            }
-        }
-        return false;
+        // this could in concept throw a NPE, but if it does, how
+
+        return this.getParentMap().get(object).get(0).isAttending();
     }
 
     /**
@@ -121,15 +143,22 @@ public class EventManager {
      * @param state the state that all of the {@link Attender}s' attending state should be set to
      */
     public void setAttending(Object object, boolean state) {
-        for (Attender attender : this.getAttenders()) {
-            if (attender.getParent() == object.getClass()) {
-                attender.setAttending(state);
-            }
+        // this could throw a NPE if you haven't properly registered it before setting the state
+        final List<Attender> attenders = this.getParentMap().get(object);
+
+        int size = attenders.size();
+        for (int i = 0; i < size; i++) {
+            final Attender attender = attenders.get(i);
+            attender.setAttending(state);
         }
     }
 
     // Getter for attenders
-    public List<Attender> getAttenders() {
-        return this.attenders;
+    public Map<Class, List<Attender>> getAttenderMap() {
+        return this.attenderMap;
+    }
+
+    public Map<Object, List<Attender>> getParentMap() {
+        return this.parentMap;
     }
 }
