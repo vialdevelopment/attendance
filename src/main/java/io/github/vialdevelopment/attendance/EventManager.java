@@ -38,6 +38,7 @@ public class EventManager {
     public void dispatch(Object event) {
         // Throws a NPE if you don't have any attenders of that type
         final List<Attender> attenders = this.getAttenderMap().get(event.getClass());
+        if (attenders == null) return;
 
         int size = attenders.size();
         for (int i = 0; i < size; i++) {
