@@ -7,13 +7,13 @@ This was made for fun, and although I probably will use it in a lot of my projec
 
 ## Usage
 ```java
-import io.github.vialdevelopment.attendance.attender.Attend;
 import io.github.vialdevelopment.attendance.attender.Attender;
-import io.github.vialdevelopment.attendance.attender.EventManager;
+import io.github.vialdevelopment.attendance.manager.EventManager;
+import io.github.vialdevelopment.attendance.manager.impl.ParentEventManager;
 
 public class Main {
 
-    private static EventManager manager = new EventManager();
+    private static EventManager manager = new ParentEventManager();
 
     public static void main(String[] args) {
         // registers the attenders and adds em to the list
@@ -28,22 +28,18 @@ public class Main {
 
     // When this is ran, these should print out 3, 2, 1, then 0 in that order because of the priority
 
-    @Attend(priority = 3)
-    public Attender<Event> event3 = new Attender<>(Event.class, event -> {
+    public Attender<Event> event3 = new Attender<>(Event.class, 3, event -> {
         System.out.println("3");
     });
 
-    @Attend(priority = 1)
-    public Attender<Event> event1 = new Attender<>(Event.class, event -> {
+    public Attender<Event> event1 = new Attender<>(Event.class, 1, event -> {
         System.out.println("1");
     });
 
-    @Attend(priority = 2)
-    public Attender<Event> event2 = new Attender<>(Event.class, event -> {
+    public Attender<Event> event2 = new Attender<>(Event.class, 2, event -> {
         System.out.println("2");
     });
 
-    @Attend(priority = 0)
     public Attender<Event> event0 = new Attender<>(Event.class, event -> {
         System.out.println("0");
     });

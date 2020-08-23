@@ -20,12 +20,12 @@ public class Attender<T> {
     /**
      * the consumer, used for doing the
      */
-    private Consumer<T> consumer;
+    private final Consumer<T> consumer;
 
     /**
      * the class that the consumer uses
      */
-    private Class<T> consumerClass;
+    private final Class<T> consumerClass;
 
     /**
      * the parent object that this was declared in
@@ -35,11 +35,18 @@ public class Attender<T> {
     /**
      * the priority of this, so we can organize them
      */
-    private long priority;
+    private final long priority;
 
     // They won't happen
+    public Attender(Class<T> consumerClass, long priority, Consumer<T> consumer) {
+        this.consumerClass = consumerClass;
+        this.priority = priority;
+        this.consumer = consumer;
+    }
+
     public Attender(Class<T> consumerClass, Consumer<T> consumer) {
         this.consumerClass = consumerClass;
+        this.priority = 0;
         this.consumer = consumer;
     }
 
@@ -47,7 +54,7 @@ public class Attender<T> {
      * @param event runs the event through the consumer
      */
     public void dispatch(T event) {
-        this.consumer.accept(event);
+        this.getConsumer().accept(event);
     }
 
     /**
@@ -55,17 +62,13 @@ public class Attender<T> {
      */
     public long getSortingPriority() {
         // return negative priority so we don't have to reverse the list
-        return -this.priority;
+        return -this.getPriority();
     }
 
     // getters and setters
 
     public Consumer<T> getConsumer() {
         return this.consumer;
-    }
-
-    public void setConsumer(Consumer<T> consumer) {
-        this.consumer = consumer;
     }
 
     public boolean isAttending() {
@@ -82,10 +85,6 @@ public class Attender<T> {
 
     public long getPriority() {
         return this.priority;
-    }
-
-    public void setPriority(long priority) {
-        this.priority = priority;
     }
 
     public Object getParent() {
