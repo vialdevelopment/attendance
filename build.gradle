@@ -6,7 +6,7 @@ group = "io.github.vialdevelopment"
 archivesBaseName = "attendance"
 version '1.0'
 
-sourceCompatibility = 1.8
+sourceCompatibility = JavaVersion.VERSION_14
 
 repositories {
     mavenCentral()

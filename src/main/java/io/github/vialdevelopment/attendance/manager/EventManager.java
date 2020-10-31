@@ -16,6 +16,7 @@ import java.util.*;
  * An interface to standardize separate managers, like {@link ParentEventManager} or {@link FieldEventManager}
  * also makes it easier if I want to add other types in the future
  */
+@SuppressWarnings("rawtypes")
 public interface EventManager<T> {
 
     /**
@@ -57,5 +58,5 @@ public interface EventManager<T> {
     /**
      * a map of the consumer classes and the {@link Attender}s that are attending to them
      */
-    Map<Class, List<Attender>> getAttenderMap();
+    Map<Class<?>, List<Attender>> getAttenderMap();
 }

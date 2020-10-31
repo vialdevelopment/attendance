@@ -12,10 +12,11 @@ import java.util.*;
  *
  * This is similar to the previous EventManager, but it should, ideally, run faster
  */
+@SuppressWarnings("rawtypes")
 public class ParentEventManager implements EventManager<Object> {
 
     // map
-    private final Map<Class, List<Attender>> attenderMap = new HashMap<>();
+    private final Map<Class<?>, List<Attender>> attenderMap = new HashMap<>();
 
     /**
      * a map of the parent classes and if they are attending
@@ -28,14 +29,17 @@ public class ParentEventManager implements EventManager<Object> {
      *
      * @param event an event to dispatch to ALL the attending {@link Attender}s
      */
-    @Override
     @SuppressWarnings("unchecked")
+    @Override
     public synchronized void dispatch(Object event) {
         // Throws a NPE if you don't have any attenders of that type
         final List<Attender> attenders = this.getAttenderMap().get(event.getClass());
         if (attenders == null) return;
 
         int size = attenders.size();
+
+        if (size == 0) return;
+
         for (int i = 0; i < size; i++) {
             final Attender attender = attenders.get(i);
             if (this.isAttended(attender.getParent())) {
@@ -138,7 +142,7 @@ public class ParentEventManager implements EventManager<Object> {
     }
 
     // Getter for attenders
-    public Map<Class, List<Attender>> getAttenderMap() {
+    public Map<Class<?>, List<Attender>> getAttenderMap() {
         return this.attenderMap;
     }
 

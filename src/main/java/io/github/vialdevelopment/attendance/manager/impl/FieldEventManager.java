@@ -11,23 +11,27 @@ import java.util.*;
  *
  * implementation of {@link EventManager}, this implementation lets you input singular field
  */
+@SuppressWarnings("rawtypes")
 public class FieldEventManager implements EventManager<Attender> {
 
     // the map
-    private final Map<Class, List<Attender>> attenderMap = new HashMap<>();
+    private final Map<Class<?>, List<Attender>> attenderMap = new HashMap<>();
 
     /**
      * Dispatches an event to all events in the map, I overrode the default because
      *
      * @param event an event to dispatch to ALL the attending {@link Attender}s
      */
-    @Override
     @SuppressWarnings("unchecked")
+    @Override
     public synchronized void dispatch(Object event) {
         final List<Attender> attenders = this.getAttenderMap().get(event.getClass());
         if (attenders == null) return;
 
         int size = attenders.size();
+
+        if (size == 0) return;
+
         for (int i = 0; i < size; i++) {
             final Attender attender = attenders.get(i);
             if (attender.isAttending()) {
@@ -104,7 +108,7 @@ public class FieldEventManager implements EventManager<Attender> {
     }
 
     @Override
-    public Map<Class, List<Attender>> getAttenderMap() {
+    public Map<Class<?>, List<Attender>> getAttenderMap() {
         return this.attenderMap;
     }
 }
