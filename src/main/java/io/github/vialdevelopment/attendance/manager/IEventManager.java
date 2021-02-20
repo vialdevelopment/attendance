@@ -50,6 +50,11 @@ public interface IEventManager<T> {
     void setAttending(T generic, boolean state);
 
     /**
+     * Builds the dispatcher
+     */
+    default void build() {}
+
+    /**
      * a map of the consumer classes and the {@link Attender}s that are attending to them
      */
     Map<Class<?>, List<Attender>> getAttenderMap();

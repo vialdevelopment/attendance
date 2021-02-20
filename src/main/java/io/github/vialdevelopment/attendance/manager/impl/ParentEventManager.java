@@ -3,8 +3,10 @@ package io.github.vialdevelopment.attendance.manager.impl;
 import io.github.vialdevelopment.attendance.attender.Attender;
 import io.github.vialdevelopment.attendance.manager.IDispatcher;
 import io.github.vialdevelopment.attendance.manager.IEventManager;
+import io.github.vialdevelopment.attendance.manager.impl.asm.DispatcherFactory;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**
@@ -22,20 +24,10 @@ public class ParentEventManager implements IEventManager<Object> {
     /**
      * The dispatcher
      */
-    @SuppressWarnings("unchecked")
-    private final IDispatcher dispatcher = event -> {
-        // Throws a NPE if you don't have any attenders of that type
-        final List<Attender> attenders = getAttenderMap().get(event.getClass());
-        if (attenders == null) return;
-
-        for (final Attender attender : attenders) {
-            attender.dispatch(event);
-        }
-    };
+    public IDispatcher dispatcher;
 
     /**
      * This dispatches any Object as an event to any listener that takes it
-     *
      * @param event an event to dispatch to ALL the attending {@link Attender}s
      */
     @Override
@@ -113,6 +105,20 @@ public class ParentEventManager implements IEventManager<Object> {
     // Getter for attenders
     public Map<Class<?>, List<Attender>> getAttenderMap() {
         return this.attenderMap;
+    }
+
+    @Override
+    public void build() {
+        List<Attender> allAttenders = new ArrayList<>();
+        for (Map.Entry<Class<?>, List<Attender>> classListEntry : getAttenderMap().entrySet()) {
+            allAttenders.addAll(classListEntry.getValue());
+        }
+        try {
+            dispatcher = DispatcherFactory.generate(allAttenders);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            e.printStackTrace();
+            System.out.println("FAILED TO CREATE DISPATCHER! ABORT!");
+        }
     }
 
 }

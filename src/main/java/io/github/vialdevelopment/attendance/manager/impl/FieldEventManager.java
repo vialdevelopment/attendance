@@ -3,7 +3,9 @@ package io.github.vialdevelopment.attendance.manager.impl;
 import io.github.vialdevelopment.attendance.attender.Attender;
 import io.github.vialdevelopment.attendance.manager.IDispatcher;
 import io.github.vialdevelopment.attendance.manager.IEventManager;
+import io.github.vialdevelopment.attendance.manager.impl.asm.DispatcherFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**
@@ -19,17 +21,9 @@ public class FieldEventManager implements IEventManager<Attender> {
     private final Map<Class<?>, List<Attender>> attenderMap = new HashMap<>();
 
     /**
-     * the dispatcher
+     * The dispatcher
      */
-    @SuppressWarnings("unchecked")
-    private final IDispatcher dispatcher = event -> {
-        final List<Attender> attenders = getAttenderMap().get(event.getClass());
-        if (attenders == null) return;
-
-        for (final Attender attender : attenders) {
-            attender.dispatch(event);
-        }
-    };
+    public IDispatcher dispatcher;
 
     /**
      * Dispatches an event to all events in the map, I overrode the default because
@@ -88,6 +82,20 @@ public class FieldEventManager implements IEventManager<Attender> {
     @Override
     public Map<Class<?>, List<Attender>> getAttenderMap() {
         return this.attenderMap;
+    }
+
+    @Override
+    public void build() {
+        List<Attender> allAttenders = new ArrayList<>();
+        for (Map.Entry<Class<?>, List<Attender>> classListEntry : getAttenderMap().entrySet()) {
+            allAttenders.addAll(classListEntry.getValue());
+        }
+        try {
+            dispatcher = DispatcherFactory.generate(allAttenders);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            e.printStackTrace();
+            System.out.println("FAILED TO CREATE DISPATCHER! ABORT!");
+        }
     }
 
 }
