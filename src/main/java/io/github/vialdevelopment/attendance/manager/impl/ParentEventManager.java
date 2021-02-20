@@ -15,15 +15,12 @@ import java.util.*;
  *
  * This is similar to the previous IEventManager, but it should, ideally, run faster
  */
-@SuppressWarnings("rawtypes")
 public class ParentEventManager implements IEventManager<Object> {
 
-    // map
+    /** Map holding attenders */
     private final Map<Class<?>, List<Attender>> attenderMap = new HashMap<>();
 
-    /**
-     * The dispatcher
-     */
+    /** The dispatcher */
     private IDispatcher dispatcher;
 
     /**
@@ -103,11 +100,17 @@ public class ParentEventManager implements IEventManager<Object> {
         }
     }
 
-    // Getter for attenders
+    /**
+     * Attenders getter
+     * @return attenders
+     */
     public Map<Class<?>, List<Attender>> getAttenderMap() {
         return this.attenderMap;
     }
 
+    /**
+     * Build the dispatcher
+     */
     @Override
     public void build() {
         List<Attender> allAttenders = new ArrayList<>();

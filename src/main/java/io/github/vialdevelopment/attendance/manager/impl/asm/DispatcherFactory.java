@@ -20,6 +20,7 @@ import static org.objectweb.asm.Opcodes.*;
  * @author nirvana
  */
 public class DispatcherFactory {
+
     /** Counter for generated factories to avoid duplicates */
     private static int generatedCounter = 0;
     /** Class loader used */

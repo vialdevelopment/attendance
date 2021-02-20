@@ -12,17 +12,14 @@ import java.util.*;
  * @author cats
  * @since August 22, 2020
  *
- * implementation of {@link IEventManager}, this implementation lets you input singular field
+ * Implementation of {@link IEventManager}, this implementation lets you input singular field
  */
-@SuppressWarnings("rawtypes")
 public class FieldEventManager implements IEventManager<Attender> {
 
-    // the map
+    /** Attenders map */
     private final Map<Class<?>, List<Attender>> attenderMap = new HashMap<>();
 
-    /**
-     * The dispatcher
-     */
+    /** The dispatcher */
     private IDispatcher dispatcher;
 
     /**
@@ -79,11 +76,18 @@ public class FieldEventManager implements IEventManager<Attender> {
         }
     }
 
+    /**
+     * Get attenders map
+     * @return attenders
+     */
     @Override
     public Map<Class<?>, List<Attender>> getAttenderMap() {
         return this.attenderMap;
     }
 
+    /**
+     * Builds the dispatcher
+     */
     @Override
     public void build() {
         List<Attender> allAttenders = new ArrayList<>();
