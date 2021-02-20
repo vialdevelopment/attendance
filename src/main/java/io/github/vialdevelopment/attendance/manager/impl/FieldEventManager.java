@@ -1,43 +1,35 @@
 package io.github.vialdevelopment.attendance.manager.impl;
 
 import io.github.vialdevelopment.attendance.attender.Attender;
-import io.github.vialdevelopment.attendance.manager.EventManager;
+import io.github.vialdevelopment.attendance.manager.IDispatcher;
+import io.github.vialdevelopment.attendance.manager.IEventManager;
+import io.github.vialdevelopment.attendance.manager.impl.asm.DispatcherFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**
  * @author cats
  * @since August 22, 2020
  *
- * implementation of {@link EventManager}, this implementation lets you input singular field
+ * Implementation of {@link IEventManager}, this implementation lets you input singular field
  */
-@SuppressWarnings("rawtypes")
-public class FieldEventManager implements EventManager<Attender> {
+public class FieldEventManager implements IEventManager<Attender> {
 
-    // the map
+    /** Attenders map */
     private final Map<Class<?>, List<Attender>> attenderMap = new HashMap<>();
+
+    /** The dispatcher */
+    private IDispatcher dispatcher;
 
     /**
      * Dispatches an event to all events in the map, I overrode the default because
      *
      * @param event an event to dispatch to ALL the attending {@link Attender}s
      */
-    @SuppressWarnings("unchecked")
     @Override
-    public synchronized void dispatch(Object event) {
-        final List<Attender> attenders = this.getAttenderMap().get(event.getClass());
-        if (attenders == null) return;
-
-        int size = attenders.size();
-
-        if (size == 0) return;
-
-        for (int i = 0; i < size; i++) {
-            final Attender attender = attenders.get(i);
-            if (attender.isAttending()) {
-                attender.dispatch(event);
-            }
-        }
+    public void dispatch(Object event) {
+        dispatcher.dispatch(event);
     }
 
     /**
@@ -46,7 +38,7 @@ public class FieldEventManager implements EventManager<Attender> {
      * @param attender the {@link Attender} to register
      */
     @Override
-    public synchronized void registerAttender(Attender attender) {
+    public void registerAttender(Attender attender) {
 
         if (!this.getAttenderMap().containsKey(attender.getConsumerClass())) {
             this.getAttenderMap().put(attender.getConsumerClass(), Collections.synchronizedList(new ArrayList<>()));
@@ -64,31 +56,8 @@ public class FieldEventManager implements EventManager<Attender> {
      * @param attender the {@link Attender} to remove from
      */
     @Override
-    public synchronized void unregisterAttender(Attender attender) {
-
-        if(attender != null) {
-            // this might thrown a NPE if you try to unregister an Attender that has not been registered
-            this.getAttenderMap().get(attender.getConsumerClass()).remove(attender);
-        }
-    }
-
-    /**
-     * @deprecated just interact with the {@link Attender} directly
-     *
-     * @param attender the {@link Attender} to check
-     * @return if that object is attended
-     */
-    @Deprecated
-    @Override
-    public synchronized boolean isAttended(Attender attender) {
-
-        for (Attender checkingAttender : this.getAttenderMap().get(attender.getConsumerClass())) {
-            if (checkingAttender == attender) {
-                return checkingAttender.isAttending();
-            }
-        }
-
-        return false;
+    public void unregisterAttender(Attender attender) {
+        attender.setAttending(false);
     }
 
     /**
@@ -99,7 +68,7 @@ public class FieldEventManager implements EventManager<Attender> {
      */
     @Deprecated
     @Override
-    public synchronized void setAttending(Attender attender, boolean state) {
+    public void setAttending(Attender attender, boolean state) {
         for (Attender checkingAttender : this.getAttenderMap().get(attender.getConsumerClass())) {
             if (checkingAttender == attender) {
                 checkingAttender.setAttending(state);
@@ -107,8 +76,30 @@ public class FieldEventManager implements EventManager<Attender> {
         }
     }
 
+    /**
+     * Get attenders map
+     * @return attenders
+     */
     @Override
     public Map<Class<?>, List<Attender>> getAttenderMap() {
         return this.attenderMap;
     }
+
+    /**
+     * Builds the dispatcher
+     */
+    @Override
+    public void build() {
+        List<Attender> allAttenders = new ArrayList<>();
+        for (Map.Entry<Class<?>, List<Attender>> classListEntry : getAttenderMap().entrySet()) {
+            allAttenders.addAll(classListEntry.getValue());
+        }
+        try {
+            dispatcher = DispatcherFactory.generate(allAttenders);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            e.printStackTrace();
+            System.out.println("FAILED TO CREATE DISPATCHER! ABORT!");
+        }
+    }
+
 }

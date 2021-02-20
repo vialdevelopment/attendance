@@ -1,7 +1,8 @@
 package io.github.vialdevelopment.attendance.manager;
 
 import io.github.vialdevelopment.attendance.attender.Attender;
-import io.github.vialdevelopment.attendance.manager.impl.*;
+import io.github.vialdevelopment.attendance.manager.impl.async.AsyncFieldEventManager;
+import io.github.vialdevelopment.attendance.manager.impl.async.AsyncParentEventManager;
 
 import java.util.*;
 
@@ -13,11 +14,11 @@ import java.util.*;
  *
  * This will show warnings if you use it as a declaration without defining {@link T}, just define it as an instance of that class
  *
- * An interface to standardize separate managers, like {@link ParentEventManager} or {@link FieldEventManager}
+ * An interface to standardize separate managers, like {@link AsyncParentEventManager} or {@link AsyncFieldEventManager}
  * also makes it easier if I want to add other types in the future
  */
 @SuppressWarnings("rawtypes")
-public interface EventManager<T> {
+public interface IEventManager<T> {
 
     /**
      * This dispatches any Object as an event to any listener that takes it
@@ -44,16 +45,15 @@ public interface EventManager<T> {
     void unregisterAttender(T generic);
 
     /**
-     * @param generic an {@link T} to check
-     * @return if that {@link T}'s {@link Attender}s (if it has any) are attending
-     */
-    boolean isAttended(T generic);
-
-    /**
      * @param generic an {@link T} containing {@link Attender}s
      * @param state the state that all of the {@link Attender}s' attending state should be set to
      */
     void setAttending(T generic, boolean state);
+
+    /**
+     * Builds the dispatcher, only for ASM impl
+     */
+    default void build() {}
 
     /**
      * a map of the consumer classes and the {@link Attender}s that are attending to them

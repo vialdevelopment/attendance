@@ -1,13 +1,26 @@
 plugins {
     id 'java'
+    id 'maven-publish'
 }
 
 group = "io.github.vialdevelopment"
 archivesBaseName = "attendance"
-version '1.0'
+version 'asm-1.0'
 
-sourceCompatibility = JavaVersion.VERSION_14
+sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
     mavenCentral()
+}
+
+dependencies {
+    implementation 'org.ow2.asm:asm:9.0'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
 }
