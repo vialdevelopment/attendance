@@ -66,11 +66,7 @@ public class FieldEventManager implements IEventManager<Attender> {
      */
     @Override
     public synchronized void unregisterAttender(Attender attender) {
-
-        if(attender != null) {
-            // this might thrown a NPE if you try to unregister an Attender that has not been registered
-            this.getAttenderMap().get(attender.getConsumerClass()).remove(attender);
-        }
+        attender.setAttending(false);
     }
 
     /**
