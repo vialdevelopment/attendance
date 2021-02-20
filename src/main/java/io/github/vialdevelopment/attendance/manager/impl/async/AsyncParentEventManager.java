@@ -1,4 +1,4 @@
-package io.github.vialdevelopment.attendance.manager.impl;
+package io.github.vialdevelopment.attendance.manager.impl.async;
 
 import io.github.vialdevelopment.attendance.attender.Attender;
 import io.github.vialdevelopment.attendance.manager.IDispatcher;
@@ -15,7 +15,7 @@ import java.util.*;
  *
  * This is similar to the previous IEventManager, but it should, ideally, run faster
  */
-public class ParentEventManager implements IEventManager<Object> {
+public class AsyncParentEventManager implements IEventManager<Object> {
 
     /** Map holding attenders */
     private final Map<Class<?>, List<Attender>> attenderMap = new HashMap<>();
@@ -25,10 +25,11 @@ public class ParentEventManager implements IEventManager<Object> {
 
     /**
      * This dispatches any Object as an event to any listener that takes it
+     *
      * @param event an event to dispatch to ALL the attending {@link Attender}s
      */
     @Override
-    public void dispatch(Object event) {
+    public synchronized void dispatch(Object event) {
         dispatcher.dispatch(event);
     }
 
@@ -37,7 +38,7 @@ public class ParentEventManager implements IEventManager<Object> {
      *
      * @param object the object to check
      */
-    public void registerAttender(Object object) {
+    public synchronized void registerAttender(Object object) {
         for (Field field : object.getClass().getDeclaredFields()) {
 
             if (field.getType() == Attender.class) {
@@ -78,7 +79,7 @@ public class ParentEventManager implements IEventManager<Object> {
      *
      * @param object the object to remove from
      */
-    public void unregisterAttender(Object object) {
+    public synchronized void unregisterAttender(Object object) {
         for (Map.Entry<Class<?>, List<Attender>> classListEntry : getAttenderMap().entrySet()) {
             for (Attender attender : classListEntry.getValue()) {
                 if (attender.getParent().equals(object)) attender.setAttending(false);
@@ -90,7 +91,7 @@ public class ParentEventManager implements IEventManager<Object> {
      * @param object an object containing {@link Attender}s
      * @param state the state that all of the {@link Attender}s' attending state should be set to
      */
-    public void setAttending(Object object, boolean state) {
+    public synchronized void setAttending(Object object, boolean state) {
         // this could throw a NPE if you haven't properly registered it before setting the state
         for (Map.Entry<Class<?>, List<Attender>> classListEntry : getAttenderMap().entrySet()) {
             for (Attender attender : classListEntry.getValue()) {

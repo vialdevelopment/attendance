@@ -1,4 +1,4 @@
-package io.github.vialdevelopment.attendance.manager.impl;
+package io.github.vialdevelopment.attendance.manager.impl.async;
 
 import io.github.vialdevelopment.attendance.attender.Attender;
 import io.github.vialdevelopment.attendance.manager.IDispatcher;
@@ -14,7 +14,7 @@ import java.util.*;
  *
  * Implementation of {@link IEventManager}, this implementation lets you input singular field
  */
-public class FieldEventManager implements IEventManager<Attender> {
+public class AsyncFieldEventManager implements IEventManager<Attender> {
 
     /** Attenders map */
     private final Map<Class<?>, List<Attender>> attenderMap = new HashMap<>();
@@ -28,7 +28,7 @@ public class FieldEventManager implements IEventManager<Attender> {
      * @param event an event to dispatch to ALL the attending {@link Attender}s
      */
     @Override
-    public void dispatch(Object event) {
+    public synchronized void dispatch(Object event) {
         dispatcher.dispatch(event);
     }
 
@@ -38,7 +38,7 @@ public class FieldEventManager implements IEventManager<Attender> {
      * @param attender the {@link Attender} to register
      */
     @Override
-    public void registerAttender(Attender attender) {
+    public synchronized void registerAttender(Attender attender) {
 
         if (!this.getAttenderMap().containsKey(attender.getConsumerClass())) {
             this.getAttenderMap().put(attender.getConsumerClass(), Collections.synchronizedList(new ArrayList<>()));
@@ -56,7 +56,7 @@ public class FieldEventManager implements IEventManager<Attender> {
      * @param attender the {@link Attender} to remove from
      */
     @Override
-    public void unregisterAttender(Attender attender) {
+    public synchronized void unregisterAttender(Attender attender) {
         attender.setAttending(false);
     }
 
@@ -68,7 +68,7 @@ public class FieldEventManager implements IEventManager<Attender> {
      */
     @Deprecated
     @Override
-    public void setAttending(Attender attender, boolean state) {
+    public synchronized void setAttending(Attender attender, boolean state) {
         for (Attender checkingAttender : this.getAttenderMap().get(attender.getConsumerClass())) {
             if (checkingAttender == attender) {
                 checkingAttender.setAttending(state);

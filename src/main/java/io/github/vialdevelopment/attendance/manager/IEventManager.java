@@ -1,7 +1,8 @@
 package io.github.vialdevelopment.attendance.manager;
 
 import io.github.vialdevelopment.attendance.attender.Attender;
-import io.github.vialdevelopment.attendance.manager.impl.*;
+import io.github.vialdevelopment.attendance.manager.impl.async.AsyncFieldEventManager;
+import io.github.vialdevelopment.attendance.manager.impl.async.AsyncParentEventManager;
 
 import java.util.*;
 
@@ -13,7 +14,7 @@ import java.util.*;
  *
  * This will show warnings if you use it as a declaration without defining {@link T}, just define it as an instance of that class
  *
- * An interface to standardize separate managers, like {@link ParentEventManager} or {@link FieldEventManager}
+ * An interface to standardize separate managers, like {@link AsyncParentEventManager} or {@link AsyncFieldEventManager}
  * also makes it easier if I want to add other types in the future
  */
 @SuppressWarnings("rawtypes")
