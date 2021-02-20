@@ -16,14 +16,14 @@ import java.util.*;
 public class FieldEventManager implements IEventManager<Attender> {
 
     // the map
-    private final Map<Class<?>, List<Attender>> attenderMap = new HashMap<>();
+    private final Map<Class<?>, Set<Attender>> attenderMap = new HashMap<>();
 
     /**
      * the dispatcher
      */
     @SuppressWarnings("unchecked")
     private final IDispatcher dispatcher = event -> {
-        final List<Attender> attenders = getAttenderMap().get(event.getClass());
+        final Set<Attender> attenders = getAttenderMap().get(event.getClass());
         if (attenders == null) return;
 
         for (final Attender attender : attenders) {
@@ -50,13 +50,11 @@ public class FieldEventManager implements IEventManager<Attender> {
     public synchronized void registerAttender(Attender attender) {
 
         if (!this.getAttenderMap().containsKey(attender.getConsumerClass())) {
-            this.getAttenderMap().put(attender.getConsumerClass(), Collections.synchronizedList(new ArrayList<>()));
+            this.getAttenderMap().put(attender.getConsumerClass(), Collections.synchronizedSet(new TreeSet<>()));
         }
 
-        final List<Attender> attenders = this.getAttenderMap().get(attender.getConsumerClass());
-
+        final Set<Attender> attenders = this.getAttenderMap().get(attender.getConsumerClass());
         attenders.add(attender);
-        attenders.sort(Comparator.comparing(Attender::getSortingPriority));
     }
 
     /**
@@ -90,7 +88,7 @@ public class FieldEventManager implements IEventManager<Attender> {
     }
 
     @Override
-    public Map<Class<?>, List<Attender>> getAttenderMap() {
+    public Map<Class<?>, Set<Attender>> getAttenderMap() {
         return this.attenderMap;
     }
 
