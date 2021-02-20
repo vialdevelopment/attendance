@@ -44,12 +44,6 @@ public interface IEventManager<T> {
     void unregisterAttender(T generic);
 
     /**
-     * @param generic an {@link T} to check
-     * @return if that {@link T}'s {@link Attender}s (if it has any) are attending
-     */
-    boolean isAttended(T generic);
-
-    /**
      * @param generic an {@link T} containing {@link Attender}s
      * @param state the state that all of the {@link Attender}s' attending state should be set to
      */

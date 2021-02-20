@@ -20,12 +20,6 @@ public class ParentEventManager implements IEventManager<Object> {
     private final Map<Class<?>, List<Attender>> attenderMap = new HashMap<>();
 
     /**
-     * a map of the parent classes and if they are attending
-     * this is a bit odd, but it is used to
-     */
-    private final Map<Object, Boolean> parentMap = new HashMap<>();
-
-    /**
      * The dispatcher
      */
     @SuppressWarnings("unchecked")
@@ -39,9 +33,7 @@ public class ParentEventManager implements IEventManager<Object> {
         if (size == 0) return;
 
         for (final Attender attender : attenders) {
-            if (isAttended(attender.getParent())) {
-                        attender.dispatch(event);
-            }
+            attender.dispatch(event);
         }
     };
 
@@ -86,9 +78,6 @@ public class ParentEventManager implements IEventManager<Object> {
                         this.getAttenderMap().put(attender.getConsumerClass(), Collections.synchronizedList(new ArrayList<>()));
                     }
 
-                    if (!this.getParentMap().containsKey(object)) {
-                        this.getParentMap().put(object, false);
-                    }
                     final List<Attender> attenders = this.getAttenderMap().get(attender.getConsumerClass());
 
                     attenders.add(attender);
@@ -99,43 +88,17 @@ public class ParentEventManager implements IEventManager<Object> {
         }
     }
 
-
     /**
      * Removes the {@link Attender}s from the list if they are in the given object
      *
      * @param object the object to remove from
      */
     public synchronized void unregisterAttender(Object object) {
-        for (Field field : object.getClass().getDeclaredFields()) {
-            if (field.getType() == Attender.class) {
-                Attender listener = null;
-
-                // Thanks to Tigermouthbear, I used his as reference when writing this
-                try {
-                    boolean accessible = field.isAccessible();
-                    field.setAccessible(true);
-                    listener = (Attender) field.get(object);
-                    field.setAccessible(accessible);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-
-                if(listener != null) {
-                    // this might thrown a NPE if you try to unregister an Attender that has not been registered
-                    this.getAttenderMap().get(listener.getConsumerClass()).remove(listener);
-                }
+        for (Map.Entry<Class<?>, List<Attender>> classListEntry : getAttenderMap().entrySet()) {
+            for (Attender attender : classListEntry.getValue()) {
+                if (attender.getParent().equals(object)) attender.setAttending(false);
             }
         }
-    }
-
-    /**
-     * @param object an object to check
-     * @return if that object's {@link Attender}s (if it has any) are attending
-     */
-    public synchronized boolean isAttended(Object object) {
-        // this could in concept throw a NPE, but if it does, how
-
-        return this.getParentMap().get(object);
     }
 
     /**
@@ -144,8 +107,11 @@ public class ParentEventManager implements IEventManager<Object> {
      */
     public synchronized void setAttending(Object object, boolean state) {
         // this could throw a NPE if you haven't properly registered it before setting the state
-        this.getParentMap().remove(object);
-        this.getParentMap().put(object, state);
+        for (Map.Entry<Class<?>, List<Attender>> classListEntry : getAttenderMap().entrySet()) {
+            for (Attender attender : classListEntry.getValue()) {
+                if (attender.getParent().equals(object)) attender.setAttending(state);
+            }
+        }
     }
 
     // Getter for attenders
@@ -153,7 +119,4 @@ public class ParentEventManager implements IEventManager<Object> {
         return this.attenderMap;
     }
 
-    public Map<Object, Boolean> getParentMap() {
-        return this.parentMap;
-    }
 }

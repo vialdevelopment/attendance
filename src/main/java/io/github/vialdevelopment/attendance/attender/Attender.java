@@ -51,10 +51,10 @@ public class Attender<T> {
     }
 
     /**
-     * @param event runs the event through the consumer
+     * @param event runs the event through the consumer if we're attending
      */
     public void dispatch(T event) {
-        this.getConsumer().accept(event);
+        if (attending) this.getConsumer().accept(event);
     }
 
     /**

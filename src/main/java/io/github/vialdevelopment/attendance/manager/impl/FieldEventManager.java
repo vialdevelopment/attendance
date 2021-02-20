@@ -31,9 +31,7 @@ public class FieldEventManager implements IEventManager<Attender> {
         if (size == 0) return;
 
         for (final Attender attender : attenders) {
-            if (attender.isAttending()) {
-                attender.dispatch(event);
-            }
+            attender.dispatch(event);
         }
     };
 
@@ -82,25 +80,6 @@ public class FieldEventManager implements IEventManager<Attender> {
     /**
      * @deprecated just interact with the {@link Attender} directly
      *
-     * @param attender the {@link Attender} to check
-     * @return if that object is attended
-     */
-    @Deprecated
-    @Override
-    public synchronized boolean isAttended(Attender attender) {
-
-        for (Attender checkingAttender : this.getAttenderMap().get(attender.getConsumerClass())) {
-            if (checkingAttender == attender) {
-                return checkingAttender.isAttending();
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @deprecated just interact with the {@link Attender} directly
-     *
      * @param attender an {@link Attender}
      * @param state the state that all of the {@link Attender}
      */
@@ -118,4 +97,5 @@ public class FieldEventManager implements IEventManager<Attender> {
     public Map<Class<?>, List<Attender>> getAttenderMap() {
         return this.attenderMap;
     }
+
 }
