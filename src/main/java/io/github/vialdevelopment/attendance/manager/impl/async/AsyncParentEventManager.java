@@ -1,13 +1,11 @@
 package io.github.vialdevelopment.attendance.manager.impl.async;
 
 import io.github.vialdevelopment.attendance.attender.Attender;
-import io.github.vialdevelopment.attendance.manager.IDispatcher;
 import io.github.vialdevelopment.attendance.manager.IEventManager;
-import io.github.vialdevelopment.attendance.manager.impl.asm.DispatcherFactory;
+import io.github.vialdevelopment.attendance.manager.impl.ParentEventManager;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author cats
@@ -17,11 +15,7 @@ import java.util.*;
  */
 public class AsyncParentEventManager implements IEventManager<Object> {
 
-    /** Map holding attenders */
-    private final Map<Class<?>, List<Attender>> attenderMap = new HashMap<>();
-
-    /** The dispatcher */
-    private IDispatcher dispatcher;
+    private final IEventManager<Object> parentEventManager = new ParentEventManager();
 
     /**
      * This dispatches any Object as an event to any listener that takes it
@@ -30,7 +24,7 @@ public class AsyncParentEventManager implements IEventManager<Object> {
      */
     @Override
     public synchronized void dispatch(Object event) {
-        dispatcher.dispatch(event);
+        parentEventManager.dispatch(event);
     }
 
     /**
@@ -39,39 +33,7 @@ public class AsyncParentEventManager implements IEventManager<Object> {
      * @param object the object to check
      */
     public synchronized void registerAttender(Object object) {
-        for (Field field : object.getClass().getDeclaredFields()) {
-
-            if (field.getType() == Attender.class) {
-                // I recommend having something to ensure you don't unintentionally register the same Attender twice
-                // but I don't really think that needs to be done on this side, just check it in your project
-                Attender attender = null;
-
-                // Thanks to Tigermouthbear, I used his as reference when writing this
-                try {
-                    boolean accessible = field.isAccessible();
-                    field.setAccessible(true);
-                    attender = (Attender) field.get(object);
-                    field.setAccessible(accessible);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-
-                if(attender != null) {
-                    // Sets the needed information
-                    attender.setParent(object);
-
-                    if (!this.getAttenderMap().containsKey(attender.getConsumerClass())) {
-                        this.getAttenderMap().put(attender.getConsumerClass(), Collections.synchronizedList(new ArrayList<>()));
-                    }
-
-                    final List<Attender> attenders = this.getAttenderMap().get(attender.getConsumerClass());
-
-                    attenders.add(attender);
-                    attenders.sort(Comparator.comparing(Attender::getSortingPriority));
-
-                }
-            }
-        }
+        parentEventManager.registerAttender(object);
     }
 
     /**
@@ -80,11 +42,7 @@ public class AsyncParentEventManager implements IEventManager<Object> {
      * @param object the object to remove from
      */
     public synchronized void unregisterAttender(Object object) {
-        for (Map.Entry<Class<?>, List<Attender>> classListEntry : getAttenderMap().entrySet()) {
-            for (Attender attender : classListEntry.getValue()) {
-                if (attender.getParent().equals(object)) attender.setAttending(false);
-            }
-        }
+        parentEventManager.unregisterAttender(object);
     }
 
     /**
@@ -92,37 +50,23 @@ public class AsyncParentEventManager implements IEventManager<Object> {
      * @param state the state that all of the {@link Attender}s' attending state should be set to
      */
     public synchronized void setAttending(Object object, boolean state) {
-        // this could throw a NPE if you haven't properly registered it before setting the state
-        for (Map.Entry<Class<?>, List<Attender>> classListEntry : getAttenderMap().entrySet()) {
-            for (Attender attender : classListEntry.getValue()) {
-                if (attender.getParent().equals(object)) attender.setAttending(state);
-            }
-        }
+        parentEventManager.setAttending(object, state);
     }
 
     /**
      * Attenders getter
      * @return attenders
      */
-    public Map<Class<?>, List<Attender>> getAttenderMap() {
-        return this.attenderMap;
+    public synchronized Map<Class<?>, List<Attender>> getAttenderMap() {
+        return parentEventManager.getAttenderMap();
     }
 
     /**
      * Build the dispatcher
      */
     @Override
-    public void build() {
-        List<Attender> allAttenders = new ArrayList<>();
-        for (Map.Entry<Class<?>, List<Attender>> classListEntry : getAttenderMap().entrySet()) {
-            allAttenders.addAll(classListEntry.getValue());
-        }
-        try {
-            dispatcher = DispatcherFactory.generate(allAttenders);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            e.printStackTrace();
-            System.out.println("FAILED TO CREATE DISPATCHER! ABORT!");
-        }
+    public synchronized void build() {
+        parentEventManager.build();
     }
 
 }
