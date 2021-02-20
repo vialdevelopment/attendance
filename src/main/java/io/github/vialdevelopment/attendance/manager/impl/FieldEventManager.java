@@ -23,7 +23,7 @@ public class FieldEventManager implements IEventManager<Attender> {
     /**
      * The dispatcher
      */
-    public IDispatcher dispatcher;
+    private IDispatcher dispatcher;
 
     /**
      * Dispatches an event to all events in the map, I overrode the default because

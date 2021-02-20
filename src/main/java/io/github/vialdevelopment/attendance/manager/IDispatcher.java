@@ -2,6 +2,8 @@ package io.github.vialdevelopment.attendance.manager;
 
 /**
  * Dispatcher interface
+ *
+ * @author nirvana
  */
 public interface IDispatcher {
 

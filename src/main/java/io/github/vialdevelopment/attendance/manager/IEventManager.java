@@ -50,7 +50,7 @@ public interface IEventManager<T> {
     void setAttending(T generic, boolean state);
 
     /**
-     * Builds the dispatcher
+     * Builds the dispatcher, only for ASM impl
      */
     default void build() {}
 

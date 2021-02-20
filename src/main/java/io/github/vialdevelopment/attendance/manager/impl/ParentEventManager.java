@@ -24,7 +24,7 @@ public class ParentEventManager implements IEventManager<Object> {
     /**
      * The dispatcher
      */
-    public IDispatcher dispatcher;
+    private IDispatcher dispatcher;
 
     /**
      * This dispatches any Object as an event to any listener that takes it

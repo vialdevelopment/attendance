@@ -2,6 +2,8 @@ package io.github.vialdevelopment.attendance.manager.impl.asm;
 
 /**
  * A class loader to create the dispatcher classes
+ *
+ * @author nirvana
  */
 public class DispatcherClassLoader extends ClassLoader {
 
