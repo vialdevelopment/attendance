@@ -17,7 +17,7 @@ import java.util.*;
 public class ParentEventManager implements IEventManager<Object> {
 
     // map
-    private final Map<Class<?>, Set<Attender>> attenderMap = new HashMap<>();
+    private final Map<Class<?>, List<Attender>> attenderMap = new HashMap<>();
 
     /**
      * The dispatcher
@@ -25,7 +25,7 @@ public class ParentEventManager implements IEventManager<Object> {
     @SuppressWarnings("unchecked")
     private final IDispatcher dispatcher = event -> {
         // Throws a NPE if you don't have any attenders of that type
-        final Set<Attender> attenders = getAttenderMap().get(event.getClass());
+        final List<Attender> attenders = getAttenderMap().get(event.getClass());
         if (attenders == null) return;
 
         for (final Attender attender : attenders) {
@@ -71,12 +71,13 @@ public class ParentEventManager implements IEventManager<Object> {
                     attender.setParent(object);
 
                     if (!this.getAttenderMap().containsKey(attender.getConsumerClass())) {
-                        this.getAttenderMap().put(attender.getConsumerClass(), Collections.synchronizedSet(new TreeSet<>()));
+                        this.getAttenderMap().put(attender.getConsumerClass(), Collections.synchronizedList(new ArrayList<>()));
                     }
 
-                    final Set<Attender> attenders = this.getAttenderMap().get(attender.getConsumerClass());
+                    final List<Attender> attenders = this.getAttenderMap().get(attender.getConsumerClass());
 
                     attenders.add(attender);
+                    attenders.sort(Comparator.comparing(Attender::getSortingPriority));
 
                 }
             }
@@ -89,7 +90,7 @@ public class ParentEventManager implements IEventManager<Object> {
      * @param object the object to remove from
      */
     public synchronized void unregisterAttender(Object object) {
-        for (Map.Entry<Class<?>, Set<Attender>> classListEntry : getAttenderMap().entrySet()) {
+        for (Map.Entry<Class<?>, List<Attender>> classListEntry : getAttenderMap().entrySet()) {
             for (Attender attender : classListEntry.getValue()) {
                 if (attender.getParent().equals(object)) attender.setAttending(false);
             }
@@ -102,7 +103,7 @@ public class ParentEventManager implements IEventManager<Object> {
      */
     public synchronized void setAttending(Object object, boolean state) {
         // this could throw a NPE if you haven't properly registered it before setting the state
-        for (Map.Entry<Class<?>, Set<Attender>> classListEntry : getAttenderMap().entrySet()) {
+        for (Map.Entry<Class<?>, List<Attender>> classListEntry : getAttenderMap().entrySet()) {
             for (Attender attender : classListEntry.getValue()) {
                 if (attender.getParent().equals(object)) attender.setAttending(state);
             }
@@ -110,7 +111,7 @@ public class ParentEventManager implements IEventManager<Object> {
     }
 
     // Getter for attenders
-    public Map<Class<?>, Set<Attender>> getAttenderMap() {
+    public Map<Class<?>, List<Attender>> getAttenderMap() {
         return this.attenderMap;
     }
 

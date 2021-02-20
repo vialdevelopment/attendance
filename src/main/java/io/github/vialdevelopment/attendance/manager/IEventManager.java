@@ -52,5 +52,5 @@ public interface IEventManager<T> {
     /**
      * a map of the consumer classes and the {@link Attender}s that are attending to them
      */
-    Map<Class<?>, Set<Attender>> getAttenderMap();
+    Map<Class<?>, List<Attender>> getAttenderMap();
 }

@@ -10,7 +10,7 @@ import java.util.function.Consumer;
  * hooray
  * @param <T> the Event to listen for
  */
-public class Attender<T> implements Comparable {
+public class Attender<T> {
 
     /**
      * if anything dispatched should be attended to
@@ -93,11 +93,5 @@ public class Attender<T> implements Comparable {
 
     public void setParent(Object parent) {
         this.parent = parent;
-    }
-
-    @Override
-    public int compareTo(Object o) {
-        if (o == null) return 1;
-        return Long.compare(this.getSortingPriority(), ((Attender<?>) o).getSortingPriority());
     }
 }
