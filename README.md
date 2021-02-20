@@ -19,7 +19,8 @@ public class Main {
         // registers the attenders and adds em to the list
         final Main main = new Main();
         manager.registerAttender(main);
-        
+        // build the ASM handler
+        manager.build();
         // Sets them as attending
         manager.setAttending(main, true);
         // Dispatches the event
