@@ -8,7 +8,7 @@ This was made for fun, and although I probably will use it in a lot of my projec
 ## Usage
 ```java
 import io.github.vialdevelopment.attendance.attender.Attender;
-import io.github.vialdevelopment.attendance.manager.EventManager;
+import io.github.vialdevelopment.attendance.manager.IEventManager;
 import io.github.vialdevelopment.attendance.manager.impl.ParentEventManager;
 
 public class Main {

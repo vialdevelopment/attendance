@@ -1,7 +1,8 @@
 package io.github.vialdevelopment.attendance.manager.impl;
 
 import io.github.vialdevelopment.attendance.attender.Attender;
-import io.github.vialdevelopment.attendance.manager.EventManager;
+import io.github.vialdevelopment.attendance.manager.IDispatcher;
+import io.github.vialdevelopment.attendance.manager.IEventManager;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -10,10 +11,10 @@ import java.util.*;
  * @author cats
  * @since August 22, 2020
  *
- * This is similar to the previous EventManager, but it should, ideally, run faster
+ * This is similar to the previous IEventManager, but it should, ideally, run faster
  */
 @SuppressWarnings("rawtypes")
-public class ParentEventManager implements EventManager<Object> {
+public class ParentEventManager implements IEventManager<Object> {
 
     // map
     private final Map<Class<?>, List<Attender>> attenderMap = new HashMap<>();
@@ -25,27 +26,33 @@ public class ParentEventManager implements EventManager<Object> {
     private final Map<Object, Boolean> parentMap = new HashMap<>();
 
     /**
-     * This dispatches any Object as an event to any listener that takes it
-     *
-     * @param event an event to dispatch to ALL the attending {@link Attender}s
+     * The dispatcher
      */
     @SuppressWarnings("unchecked")
-    @Override
-    public synchronized void dispatch(Object event) {
+    private final IDispatcher dispatcher = event -> {
         // Throws a NPE if you don't have any attenders of that type
-        final List<Attender> attenders = this.getAttenderMap().get(event.getClass());
+        final List<Attender> attenders = getAttenderMap().get(event.getClass());
         if (attenders == null) return;
 
         int size = attenders.size();
 
         if (size == 0) return;
 
-        for (int i = 0; i < size; i++) {
-            final Attender attender = attenders.get(i);
-            if (this.isAttended(attender.getParent())) {
-                attender.dispatch(event);
+        for (final Attender attender : attenders) {
+            if (isAttended(attender.getParent())) {
+                        attender.dispatch(event);
             }
         }
+    };
+
+    /**
+     * This dispatches any Object as an event to any listener that takes it
+     *
+     * @param event an event to dispatch to ALL the attending {@link Attender}s
+     */
+    @Override
+    public synchronized void dispatch(Object event) {
+        dispatcher.dispatch(event);
     }
 
     /**

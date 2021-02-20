@@ -1,7 +1,8 @@
 package io.github.vialdevelopment.attendance.manager.impl;
 
 import io.github.vialdevelopment.attendance.attender.Attender;
-import io.github.vialdevelopment.attendance.manager.EventManager;
+import io.github.vialdevelopment.attendance.manager.IDispatcher;
+import io.github.vialdevelopment.attendance.manager.IEventManager;
 
 import java.util.*;
 
@@ -9,35 +10,41 @@ import java.util.*;
  * @author cats
  * @since August 22, 2020
  *
- * implementation of {@link EventManager}, this implementation lets you input singular field
+ * implementation of {@link IEventManager}, this implementation lets you input singular field
  */
 @SuppressWarnings("rawtypes")
-public class FieldEventManager implements EventManager<Attender> {
+public class FieldEventManager implements IEventManager<Attender> {
 
     // the map
     private final Map<Class<?>, List<Attender>> attenderMap = new HashMap<>();
 
     /**
-     * Dispatches an event to all events in the map, I overrode the default because
-     *
-     * @param event an event to dispatch to ALL the attending {@link Attender}s
+     * the dispatcher
      */
     @SuppressWarnings("unchecked")
-    @Override
-    public synchronized void dispatch(Object event) {
-        final List<Attender> attenders = this.getAttenderMap().get(event.getClass());
+    private final IDispatcher dispatcher = event -> {
+        final List<Attender> attenders = getAttenderMap().get(event.getClass());
         if (attenders == null) return;
 
         int size = attenders.size();
 
         if (size == 0) return;
 
-        for (int i = 0; i < size; i++) {
-            final Attender attender = attenders.get(i);
+        for (final Attender attender : attenders) {
             if (attender.isAttending()) {
                 attender.dispatch(event);
             }
         }
+    };
+
+    /**
+     * Dispatches an event to all events in the map, I overrode the default because
+     *
+     * @param event an event to dispatch to ALL the attending {@link Attender}s
+     */
+    @Override
+    public synchronized void dispatch(Object event) {
+        dispatcher.dispatch(event);
     }
 
     /**

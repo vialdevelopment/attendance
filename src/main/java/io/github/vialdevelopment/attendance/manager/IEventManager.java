@@ -17,7 +17,7 @@ import java.util.*;
  * also makes it easier if I want to add other types in the future
  */
 @SuppressWarnings("rawtypes")
-public interface EventManager<T> {
+public interface IEventManager<T> {
 
     /**
      * This dispatches any Object as an event to any listener that takes it
