@@ -27,11 +27,11 @@ public class FieldEventManager implements IEventManager<Attender> {
 
     /**
      * Dispatches an event to all events in the map, I overrode the default because
-     *
+     * TODO this might need to be synchronised
      * @param event an event to dispatch to ALL the attending {@link Attender}s
      */
     @Override
-    public synchronized void dispatch(Object event) {
+    public void dispatch(Object event) {
         dispatcher.dispatch(event);
     }
 

@@ -28,10 +28,11 @@ public class ParentEventManager implements IEventManager<Object> {
 
     /**
      * This dispatches any Object as an event to any listener that takes it
+     * TODO this might need to be synchronised
      * @param event an event to dispatch to ALL the attending {@link Attender}s
      */
     @Override
-    public synchronized void dispatch(Object event) {
+    public void dispatch(Object event) {
         dispatcher.dispatch(event);
     }
 
