@@ -26,10 +26,6 @@ public class FieldEventManager implements IEventManager<Attender> {
         final List<Attender> attenders = getAttenderMap().get(event.getClass());
         if (attenders == null) return;
 
-        int size = attenders.size();
-
-        if (size == 0) return;
-
         for (final Attender attender : attenders) {
             attender.dispatch(event);
         }
