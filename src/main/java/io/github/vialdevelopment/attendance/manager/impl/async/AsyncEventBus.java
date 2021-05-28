@@ -15,7 +15,15 @@ import java.util.Map;
  */
 public class AsyncEventBus implements IEventBus {
 
-    private final IEventBus eventBus = new EventBus();
+    private final IEventBus eventBus;
+
+    public AsyncEventBus(ClassLoader loader) {
+        this.eventBus = new EventBus(loader);
+    }
+
+    public AsyncEventBus() {
+        this.eventBus = new EventBus();
+    }
 
     /**
      * This dispatches any Object as an event to any listener that takes it
@@ -33,7 +41,7 @@ public class AsyncEventBus implements IEventBus {
      * @param attender the {@link Attender} to check
      */
     @Override
-    public void registerAttender(Attender attender) {
+    public synchronized void registerAttender(Attender attender) {
         eventBus.registerAttender(attender);
     }
 
@@ -53,7 +61,7 @@ public class AsyncEventBus implements IEventBus {
      * @param attender the {@link Attender} to remove
      */
     @Override
-    public void unregisterAttender(Attender attender) {
+    public synchronized void unregisterAttender(Attender attender) {
         eventBus.unregisterAttender(attender);
     }
 
@@ -87,6 +95,10 @@ public class AsyncEventBus implements IEventBus {
      */
     public synchronized Map<Class<?>, List<Attender>> getAttenderMap() {
         return eventBus.getAttenderMap();
+    }
+
+    public synchronized ClassLoader getClassLoader() {
+        return eventBus.getClassLoader();
     }
 
     /**

@@ -3,6 +3,7 @@ package io.github.vialdevelopment.attendance.manager.impl.asm;
 import io.github.vialdevelopment.attendance.attender.Attender;
 import org.objectweb.asm.*;
 
+import java.lang.invoke.WrongMethodTypeException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -25,6 +26,19 @@ public class AttenderFactory {
 
     private static final String ATTENDER = "io/github/vialdevelopment/attendance/attender/Attender";
 
+    private static final Method defineClassMethod;
+
+    static {
+        try {
+            defineClassMethod = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class);
+
+            defineClassMethod.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            throw new WrongMethodTypeException("Something is not right, defineClass was not found in ClassLoader");
+        }
+    }
+
+
     /**
      * Generate the {@link Attender}
      *
@@ -34,7 +48,8 @@ public class AttenderFactory {
      *
      * @return the {@link Attender} instance
      */
-    public static Attender generate(Object parent, Method method, long priority) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static Attender generate(Object parent, Method method, long priority, ClassLoader classLoader) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         generatedCounter++;
 
         String generatedName = "io/github/vialdevelopment/attendance/manager/impl/asm/" + method.getName() + "Attender" + generatedCounter;
@@ -81,7 +96,18 @@ public class AttenderFactory {
             mv.visitEnd();
         }
 
-        // load and init the new dispatcher
-        return (Attender) AttendanceClassLoader.INSTANCE.defineClass(generatedName.replace('/', '.'), cw.toByteArray()).getConstructor(Object.class, Method.class, long.class).newInstance(parent, method, priority);
+        if (classLoader == null) {
+            // load and init the new attender
+            return (Attender) AttendanceClassLoader.INSTANCE.defineClass(generatedName.replace('/', '.'), cw.toByteArray()).getConstructor(Object.class, Method.class, long.class).newInstance(parent, method, priority);
+        } else {
+
+
+            final byte[] bytes = cw.toByteArray();
+
+            final Class attenderClass = (Class) defineClassMethod.invoke(classLoader, generatedName.replace('/', '.'), bytes, 0, bytes.length);
+
+
+            return (Attender) attenderClass.getConstructor(Object.class, Method.class, long.class).newInstance(parent, method, priority);
+        }
     }
 }

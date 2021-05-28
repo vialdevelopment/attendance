@@ -68,4 +68,9 @@ public interface IEventBus {
      * a map of the consumer classes and the {@link Attender}s that are attending to them
      */
     Map<Class<?>, List<Attender>> getAttenderMap();
+
+    /**
+     * @return the classloader used to generate this project
+     */
+    ClassLoader getClassLoader();
 }

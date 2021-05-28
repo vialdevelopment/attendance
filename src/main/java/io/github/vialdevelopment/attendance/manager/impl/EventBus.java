@@ -26,6 +26,19 @@ public class EventBus implements IEventBus {
     private IDispatcher dispatcher;
 
     /**
+     * the classloader
+     */
+    private final ClassLoader classLoader;
+
+    public EventBus(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
+
+    public EventBus() {
+        this.classLoader = this.getClass().getClassLoader();
+    }
+
+    /**
      * This dispatches any Object as an event to any listener that takes it
      * @param event an event to dispatch to ALL the attending {@link Attender}s
      */
@@ -70,7 +83,7 @@ public class EventBus implements IEventBus {
 
             if (annotation != null) {
                 try {
-                    registerAttender(AttenderFactory.generate(object, method, annotation.value()));
+                    registerAttender(AttenderFactory.generate(object, method, annotation.value(), this.classLoader));
                 } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
                     e.printStackTrace();
                 }
@@ -141,4 +154,8 @@ public class EventBus implements IEventBus {
         }
     }
 
+    @Override
+    public ClassLoader getClassLoader() {
+        return this.classLoader;
+    }
 }
