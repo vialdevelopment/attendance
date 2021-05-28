@@ -1,12 +1,5 @@
-# Attendance
-Attendance is a small and (hopefully) decently quick event handler that supports priority and other fun things
+package io.github.vialdevelopment.attendance;
 
-It's made to be as small and simple as I can get it.
-
-This was made for fun, and although I probably will use it in a lot of my projects, I cannot recommend using it in any projects. It's not exactly made for commercial use and likely has a lot of issues.
-
-## Usage
-```java
 import io.github.vialdevelopment.attendance.attender.Attend;
 import io.github.vialdevelopment.attendance.manager.IEventBus;
 import io.github.vialdevelopment.attendance.manager.impl.EventBus;
@@ -57,4 +50,3 @@ public class Main {
         }
     }
 }
-```

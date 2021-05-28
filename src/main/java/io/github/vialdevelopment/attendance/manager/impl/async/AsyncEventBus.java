@@ -1,8 +1,8 @@
 package io.github.vialdevelopment.attendance.manager.impl.async;
 
 import io.github.vialdevelopment.attendance.attender.Attender;
-import io.github.vialdevelopment.attendance.manager.IEventManager;
-import io.github.vialdevelopment.attendance.manager.impl.ParentEventManager;
+import io.github.vialdevelopment.attendance.manager.IEventBus;
+import io.github.vialdevelopment.attendance.manager.impl.EventBus;
 
 import java.util.List;
 import java.util.Map;
@@ -13,9 +13,9 @@ import java.util.Map;
  *
  * This is similar to the previous IEventManager, but it should, ideally, run faster
  */
-public class AsyncParentEventManager implements IEventManager<Object> {
+public class AsyncEventBus implements IEventBus {
 
-    private final IEventManager<Object> parentEventManager = new ParentEventManager();
+    private final IEventBus eventBus = new EventBus();
 
     /**
      * This dispatches any Object as an event to any listener that takes it
@@ -24,7 +24,17 @@ public class AsyncParentEventManager implements IEventManager<Object> {
      */
     @Override
     public synchronized void dispatch(Object event) {
-        parentEventManager.dispatch(event);
+        eventBus.dispatch(event);
+    }
+
+    /**
+     * Registers an individual {@link Attender}
+     *
+     * @param attender the {@link Attender} to check
+     */
+    @Override
+    public void registerAttender(Attender attender) {
+        eventBus.registerAttender(attender);
     }
 
     /**
@@ -32,8 +42,19 @@ public class AsyncParentEventManager implements IEventManager<Object> {
      *
      * @param object the object to check
      */
-    public synchronized void registerAttender(Object object) {
-        parentEventManager.registerAttender(object);
+    @Override
+    public synchronized void register(Object object) {
+        eventBus.register(object);
+    }
+
+    /**
+     * Unregisters an {@link Attender} directly
+     *
+     * @param attender the {@link Attender} to remove
+     */
+    @Override
+    public void unregisterAttender(Attender attender) {
+        eventBus.unregisterAttender(attender);
     }
 
     /**
@@ -41,16 +62,23 @@ public class AsyncParentEventManager implements IEventManager<Object> {
      *
      * @param object the object to remove from
      */
-    public synchronized void unregisterAttender(Object object) {
-        parentEventManager.unregisterAttender(object);
+    public synchronized void unregister(Object object) {
+        eventBus.unregister(object);
     }
 
     /**
      * @param object an object containing {@link Attender}s
      * @param state the state that all of the {@link Attender}s' attending state should be set to
      */
+    @Override
     public synchronized void setAttending(Object object, boolean state) {
-        parentEventManager.setAttending(object, state);
+        eventBus.setAttending(object, state);
+    }
+
+    // mmmm
+    @Override
+    public synchronized void setAttending(Attender attender, boolean state) {
+        eventBus.setAttending(attender, state);
     }
 
     /**
@@ -58,7 +86,7 @@ public class AsyncParentEventManager implements IEventManager<Object> {
      * @return attenders
      */
     public synchronized Map<Class<?>, List<Attender>> getAttenderMap() {
-        return parentEventManager.getAttenderMap();
+        return eventBus.getAttenderMap();
     }
 
     /**
@@ -66,7 +94,7 @@ public class AsyncParentEventManager implements IEventManager<Object> {
      */
     @Override
     public synchronized void build() {
-        parentEventManager.build();
+        eventBus.build();
     }
 
 }
