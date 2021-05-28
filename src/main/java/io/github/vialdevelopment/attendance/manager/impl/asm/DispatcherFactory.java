@@ -23,8 +23,6 @@ public class DispatcherFactory {
 
     /** Counter for generated factories to avoid duplicates */
     private static int generatedCounter = 0;
-    /** Class loader used */
-    private static final DispatcherClassLoader classLoader = new DispatcherClassLoader(DispatcherFactory.class.getClassLoader());
 
     /**
      * Generate the dispatcher
@@ -37,7 +35,7 @@ public class DispatcherFactory {
         {
             Set<Integer> classesHashCodesSet = new TreeSet<>();
             for (Attender attender : attenders) {
-                classesHashCodesSet.add(attender.getConsumerClass().hashCode());
+                classesHashCodesSet.add(attender.getEventClass().hashCode());
             }
             classesHashCodes = new int[classesHashCodesSet.size()];
             int i = 0;
@@ -56,7 +54,7 @@ public class DispatcherFactory {
         }
 
         generatedCounter++;
-        String generatedName = "io/github/vialdevelopment/attendance/manager/impl/asm/DispatcherInstance"+generatedCounter;
+        String generatedName = "io/github/vialdevelopment/attendance/manager/impl/asm/DispatcherInstance" + generatedCounter;
         MethodVisitor mv;
         FieldVisitor fv;
         ClassWriter cw = new ClassWriter(0);
@@ -107,7 +105,7 @@ public class DispatcherFactory {
                 // find all the attenders that have the same hash code
                 // and generate calling them
                 for (int i1 = 0; i1 < attenders.size(); i1++) {
-                    if (attenders.get(i1).getConsumerClass().hashCode() == classesHashCodes[i]) {
+                    if (attenders.get(i1).getEventClass().hashCode() == classesHashCodes[i]) {
                         mv.visitVarInsn(ALOAD, 0);
                         mv.visitFieldInsn(GETFIELD, generatedName, "Attender" + i1, "Lio/github/vialdevelopment/attendance/attender/Attender;");
                         mv.visitVarInsn(ALOAD, 1);
@@ -122,7 +120,7 @@ public class DispatcherFactory {
             mv.visitEnd();
         }
         // load and init the new dispatcher
-        return (IDispatcher) classLoader.defineClass(generatedName.replace('/', '.'), cw.toByteArray()).getConstructor(List.class).newInstance(attenders);
+        return (IDispatcher) AttendanceClassLoader.INSTANCE.defineClass(generatedName.replace('/', '.'), cw.toByteArray()).getConstructor(List.class).newInstance(attenders);
     }
 
 }
