@@ -21,6 +21,7 @@ public class AsyncEventBus implements IEventBus {
         this.eventBus = new EventBus(loader);
     }
 
+    @Deprecated
     public AsyncEventBus() {
         this.eventBus = new EventBus();
     }

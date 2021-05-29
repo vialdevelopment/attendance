@@ -4,6 +4,7 @@ import io.github.vialdevelopment.attendance.attender.Attend;
 import io.github.vialdevelopment.attendance.attender.Attender;
 import io.github.vialdevelopment.attendance.manager.IDispatcher;
 import io.github.vialdevelopment.attendance.manager.IEventBus;
+import io.github.vialdevelopment.attendance.manager.impl.asm.AttendanceClassLoader;
 import io.github.vialdevelopment.attendance.manager.impl.asm.AttenderFactory;
 import io.github.vialdevelopment.attendance.manager.impl.asm.DispatcherFactory;
 
@@ -34,8 +35,9 @@ public class EventBus implements IEventBus {
         this.classLoader = classLoader;
     }
 
+    @Deprecated
     public EventBus() {
-        this.classLoader = this.getClass().getClassLoader();
+        this.classLoader = this.getClassLoader();
     }
 
     /**

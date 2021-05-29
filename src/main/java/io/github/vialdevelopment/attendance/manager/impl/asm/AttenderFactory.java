@@ -96,9 +96,9 @@ public class AttenderFactory {
             mv.visitEnd();
         }
 
-        if (classLoader == null) {
+        if (classLoader instanceof AttendanceClassLoader) {
             // load and init the new attender
-            return (Attender) AttendanceClassLoader.INSTANCE.defineClass(generatedName.replace('/', '.'), cw.toByteArray()).getConstructor(Object.class, Method.class, long.class).newInstance(parent, method, priority);
+            return (Attender) ((AttendanceClassLoader) classLoader).defineClass(generatedName.replace('/', '.'), cw.toByteArray()).getConstructor(Object.class, Method.class, long.class).newInstance(parent, method, priority);
         } else {
 
 

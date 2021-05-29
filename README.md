@@ -13,7 +13,8 @@ import io.github.vialdevelopment.attendance.manager.impl.EventBus;
 
 public class Main {
 
-    private static final IEventBus bus = new EventBus();
+    // Inputting your own classloader is required in most cases
+    private static final IEventBus bus = new EventBus(Main.class.getClassLoader());
 
     public static void main(String[] args) {
         // registers the attenders and adds em to the list
