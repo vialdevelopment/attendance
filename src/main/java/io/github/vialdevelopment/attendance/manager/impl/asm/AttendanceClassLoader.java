@@ -1,13 +1,18 @@
 package io.github.vialdevelopment.attendance.manager.impl.asm;
 
+import io.github.vialdevelopment.attendance.attender.Attender;
+
 /**
  * A class loader to create the dispatcher classes
  *
  * @author nirvana
  */
-public class DispatcherClassLoader extends ClassLoader {
+public class AttendanceClassLoader extends ClassLoader {
 
-    public DispatcherClassLoader(ClassLoader classLoader) {
+    // I assume this is fine :sunglasses:
+    public static final AttendanceClassLoader INSTANCE = new AttendanceClassLoader(Attender.class.getClassLoader());
+
+    public AttendanceClassLoader(ClassLoader classLoader) {
         super(classLoader);
     }
 

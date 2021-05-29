@@ -1,6 +1,6 @@
 package io.github.vialdevelopment.attendance.attender;
 
-import java.util.function.Consumer;
+import java.lang.reflect.Method;
 
 /**
  * @author cats
@@ -8,9 +8,9 @@ import java.util.function.Consumer;
  *
  * The attender class, stores the values and consumers and other fun things
  * hooray
- * @param <T> the Event to listen for
  */
-public class Attender<T> {
+@SuppressWarnings("rawtypes")
+public abstract class Attender {
 
     /**
      * if anything dispatched should be attended to
@@ -18,43 +18,35 @@ public class Attender<T> {
     private boolean attending;
 
     /**
-     * the consumer, used for doing the
-     */
-    private final Consumer<T> consumer;
-
-    /**
-     * the class that the consumer uses
-     */
-    private final Class<T> consumerClass;
-
-    /**
      * the parent object that this was declared in
      */
-    private Object parent;
+    private final Object parent;
 
     /**
      * the priority of this, so we can organize them
      */
     private final long priority;
 
-    // They won't happen
-    public Attender(Class<T> consumerClass, long priority, Consumer<T> consumer) {
-        this.consumerClass = consumerClass;
-        this.priority = priority;
-        this.consumer = consumer;
-    }
+    /**
+     * the method that is ran by this Attender
+     */
+    private final Method method;
 
-    public Attender(Class<T> consumerClass, Consumer<T> consumer) {
-        this.consumerClass = consumerClass;
-        this.priority = 0;
-        this.consumer = consumer;
+    private final Class eventClass;
+
+    // They won't happen
+    public Attender(Object parent, Method method, long priority) {
+        this.eventClass = method.getParameterTypes()[0];
+        this.method = method;
+        this.priority = priority;
+        this.parent = parent;
     }
 
     /**
      * @param event runs the event through the consumer if we're attending
      */
-    public void dispatch(T event) {
-        if (attending) this.getConsumer().accept(event);
+    public void dispatch(Object event) {
+        if (attending) this.invoke(this.parent, event);
     }
 
     /**
@@ -67,10 +59,6 @@ public class Attender<T> {
 
     // getters and setters
 
-    public Consumer<T> getConsumer() {
-        return this.consumer;
-    }
-
     public boolean isAttending() {
         return this.attending;
     }
@@ -79,8 +67,12 @@ public class Attender<T> {
         this.attending = attending;
     }
 
-    public Class<T> getConsumerClass() {
-        return this.consumerClass;
+    public Method getMethod() {
+        return this.method;
+    }
+
+    public Class getEventClass() {
+        return this.eventClass;
     }
 
     public long getPriority() {
@@ -91,7 +83,9 @@ public class Attender<T> {
         return this.parent;
     }
 
-    public void setParent(Object parent) {
-        this.parent = parent;
-    }
+    /**
+     * This invoke is filled in on runtime
+     * It invokes the {@link }
+     */
+    protected void invoke(Object parent, Object event) {}
 }

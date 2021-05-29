@@ -7,45 +7,55 @@ This was made for fun, and although I probably will use it in a lot of my projec
 
 ## Usage
 ```java
-import io.github.vialdevelopment.attendance.attender.Attender;
-import io.github.vialdevelopment.attendance.manager.IEventManager;
-import io.github.vialdevelopment.attendance.manager.impl.ParentEventManager;
+import io.github.vialdevelopment.attendance.attender.Attend;
+import io.github.vialdevelopment.attendance.manager.IEventBus;
+import io.github.vialdevelopment.attendance.manager.impl.EventBus;
 
 public class Main {
 
-    private static EventManager manager = new ParentEventManager();
+    // Inputting your own classloader is required in most cases
+    private static final IEventBus bus = new EventBus(Main.class.getClassLoader());
 
     public static void main(String[] args) {
         // registers the attenders and adds em to the list
         final Main main = new Main();
-        manager.registerAttender(main);
+        bus.register(main);
         // build the ASM handler
-        manager.build();
+        bus.build();
         // Sets them as attending
-        manager.setAttending(main, true);
+        bus.setAttending(main, true);
         // Dispatches the event
-        manager.dispatch(new Event());
+        bus.dispatch(new Event("hello"));
     }
 
-    // When this is ran, these should print out 3, 2, 1, then 0 in that order because of the priority
+    // When this is ran, these should print with prefixes 3, 2, 1, then 0 in that order because of the priority
+    @Attend
+    public void onEvent0(Event event) {
+        System.out.println("0 " + event.text);
+    }
 
-    public Attender<Event> event3 = new Attender<>(Event.class, 3, event -> {
-        System.out.println("3");
-    });
+    @Attend(1)
+    public void onEvent1(Event event) {
+        System.out.println("1 " + event.text);
+    }
 
-    public Attender<Event> event1 = new Attender<>(Event.class, 1, event -> {
-        System.out.println("1");
-    });
+    @Attend(2)
+    public void onEvent2(Event event) {
+        System.out.println("2 " + event.text);
+    }
 
-    public Attender<Event> event2 = new Attender<>(Event.class, 2, event -> {
-        System.out.println("2");
-    });
+    @Attend(3)
+    public void onEvent3(Event event) {
+        System.out.println("3 " + event.text);
+    }
 
-    public Attender<Event> event0 = new Attender<>(Event.class, event -> {
-        System.out.println("0");
-    });
 
-    static class Event {
+    public static class Event {
+        public final String text;
+
+        public Event(String text) {
+            this.text = text;
+        }
     }
 }
 ```
